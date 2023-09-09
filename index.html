@@ -91,11 +91,12 @@
       }
 
       function uploadAudio(audioBlob) {
-        const apiUrl = "http://doctsteel.pythonanywhere.com/test";
+        const apiUrl = "https://doctsteel.pythonanywhere.com/test";
 
         fetch(apiUrl, {
           method: "POST",
           body: audioBlob,
+          headers: ''
         })
           .then((response) => response.json())
           .then((data) => {
