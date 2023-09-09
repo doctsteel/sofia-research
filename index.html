@@ -68,9 +68,11 @@
 
             mediaRecorder.onstop = () => {
               const blob = new Blob(recordedChunks, { type: "audio/wav" });
-
+              const audioUrl = URL.createObjectURL(blob)
+              var data = new FormData()
+              data.append('file', audioUrl,'file')
               // Send the audio data to the API Gateway
-              uploadAudio(blob);
+              uploadAudio(data);
             };
 
             mediaRecorder.start();
