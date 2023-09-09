@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Audio Recording and Uploading</title>
+  </head>
+
+  <body>
+    <p>Click the button below to start recording audio.</p>
+    <button id="recordButton">Start Recording</button>
+
+    <style>
+      p {
+        font-family: sans-serif;
+        font-size: 16pt;
+        text-align: center;
+        margin-top: 200px;
+      }
+
+      button {
+        font-family: sans-serif;
+        font-size: 20pt;
+        font-weight: bold;
+        color: #ffffff;
+        background: #ff0000;
+        border: 1px solid #000000;
+        box-sizing: border-box;
+        border-radius: 4px;
+        padding: 0.5rem 1rem;
+        transition: 500ms;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+      }
+
+      button:hover {
+        background: #c40000;
+        cursor: pointer;
+      }
+    </style>
+
+    <script>
+      let isRecording = false;
+      let mediaRecorder;
+      let recordedChunks = [];
+
+      const recordButton = document.getElementById("recordButton");
+
+      recordButton.addEventListener("click", () => {
+        if (!isRecording) {
+          startRecording();
+        } else {
+          stopRecording();
+        }
+      });
+
+      function startRecording() {
+        navigator.mediaDevices
+          .getUserMedia({ audio: true })
+          .then((stream) => {
+            mediaRecorder = new MediaRecorder(stream);
+
+            mediaRecorder.ondataavailable = (event) => {
+              if (event.data.size > 0) {
+                recordedChunks.push(event.data);
+              }
+            };
+
+            mediaRecorder.onstop = () => {
+              const blob = new Blob(recordedChunks, { type: "audio/wav" });
+
+              // Send the audio data to the API Gateway
+              uploadAudio(blob);
+            };
+
+            mediaRecorder.start();
+            recordButton.textContent = "Stop Recording";
+            isRecording = true;
+          })
+          .catch((error) => {
+            console.error("Error accessing microphone:", error);
+          });
+      }
+
+      function stopRecording() {
+        if (mediaRecorder) {
+          mediaRecorder.stop();
+          recordButton.textContent = "Start Recording";
+          isRecording = false;
+        }
+      }
+
+      function uploadAudio(audioBlob) {
+        const apiUrl = "http://doctsteel.pythonanywhere.com/test";
+
+        fetch(apiUrl, {
+          method: "POST",
+          body: audioBlob,
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            console.log("Upload successful:", data);
+          })
+          .catch((error) => {
+            console.error("Upload failed:", error);
+          });
+      }
+    </script>
+  </body>
+</html>
