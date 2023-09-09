@@ -6,6 +6,9 @@ name = "pypi"
 [packages]
 flask = "*"
 gunicorn = "*"
+speechrecognition = "*"
+flask-cors = "*"
+vadersentiment = "*"
 
 [dev-packages]
 
